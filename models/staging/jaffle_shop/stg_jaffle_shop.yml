@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: One unique customer per row
+    columns:
+      - name: customer_id
+        description: Primary key for stg_customers
+        tests:
+          - unique
+          - not_null
+      - name: first_name
+        description: The first name of the customer
+      - name: last_name
+        description: The last name of the customer
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: status
+        description: '{{doc("order_status")}}'
+        tests:
+          - accepted_values:
+              values: ['returned','completed','shipped','placed','return_pending']
+  - name: stg_payments
+    columns:
+      - name: payment_id
+        description: Primary key of payments
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: Foreign key to the id of the order placed
+        tests:
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+      - name: payment_method
+        description: The method by which this was paid
+      - name: status
+        description: '{{ doc("payment_status")}}'
+        tests:
+          - accepted_values:
+              values:
+                - success
+                - fail
